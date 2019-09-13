@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Ксюша Романовская](https://up.htmlacademy.ru/javascript/18/user/809451).
-* Наставник: `Светлана Корякина` (https://htmlacademy.ru/profile/id477401).
+* Наставник: [Светлана Корякина](https://htmlacademy.ru/profile/id477401).
 
 ---
 
