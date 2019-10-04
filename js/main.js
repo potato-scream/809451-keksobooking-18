@@ -3,6 +3,7 @@
 var CARDS_NUMBER = 8;
 var PIN_HEIGHT = 70;
 var PIN_WIDTH = 50;
+var mainPin = document.querySelector('.map__pin--main');
 
 var generateCards = function () {
   var adsArray = [];
@@ -101,7 +102,11 @@ var addCardsToMap = function () {
   mapPins.appendChild(cardsFragment);
 };
 
-// addCardsToMap();
+var formEnabled = function () {
+  var form = document.querySelector('.ad-form');
+  form.classList.remove('ad-form--disabled');
+};
+
 
 // Блок с картой .map содержит класс map--faded;
 // Форма заполнения информации об объявлении .ad-form содержит класс ad-form--disabled;
@@ -124,10 +129,23 @@ for (var k = 0; k < mapFiltersFields.length; k++) {
   mapFiltersFields[k].disabled = true;
 }
 
+var fillAddress = function () {
+  var address = document.querySelector('#address');
+  var map = document.querySelector('.map');
+  var MAIN_PIN_SIZE = 65;
+  var PIN_POINTER_HEIGHT = 22;
+
+  if (map.classList.contains('map--faded')) {
+    address.value = Math.floor(mainPin.offsetLeft + MAIN_PIN_SIZE / 2) + ', ' + Math.floor(mainPin.offsetTop + MAIN_PIN_SIZE / 2);
+  } else {
+    address.value = Math.floor(mainPin.offsetLeft + MAIN_PIN_SIZE / 2) + ', ' + Math.floor(mainPin.offsetTop + MAIN_PIN_SIZE + PIN_POINTER_HEIGHT);
+  }
+};
+
+fillAddress();
 // Единственное доступное действие в неактивном состоянии — перемещение метки .map__pin--main,
 //  являющейся контролом указания адреса объявления.
 // Первое взаимодействие с меткой (mousedown) переводит страницу в активное состояние.
-var mainPin = document.querySelector('.map__pin--main');
 var onMainPinMousedown = function () {
   for (var a = 0; a < adFormFields.length; a++) {
     adFormFields[a].disabled = false;
@@ -141,8 +159,11 @@ var onMainPinMousedown = function () {
     mapFiltersFields[c].disabled = false;
   }
 
-};
 
+  addCardsToMap();
+  formEnabled();
+  fillAddress();
+};
 
 document.addEventListener('keydown', function (evt) {
   if (evt.keyCode === 13) {
@@ -152,19 +173,63 @@ document.addEventListener('keydown', function (evt) {
 
 mainPin.addEventListener('mousedown', onMainPinMousedown);
 
-// Поле «Количество комнат» синхронизировано с полем «Количество мест» таким образом,
-//  что при выборе количества комнат вводятся ограничения на допустимые варианты выбора количества гостей:
-// 1 комната — «для 1 гостя»;
-// 2 комнаты — «для 2 гостей» или «для 1 гостя»;
-// 3 комнаты — «для 3 гостей», «для 2 гостей» или «для 1 гостя»;
-// 100 комнат — «не для гостей».
-// Допускаются разные способы ограничения допустимых значений поля «Количество мест»:
-//  удаление из разметки соответствующих элементов option, добавление элементам option состояния disabled
-//  или другие способы ограничения, например, с помощью метода setCustomValidity.
-// . Вы пишите код проверки соответствия и если выбранное количество гостей не подходит под количество комнат,
-// вызываете метод setCustomValidity.
+var roomSelect = document.querySelector('#room_number');
 
-var roomSelect = document.querySelector('#housing-rooms');
-roomSelect.addEventListener('change', function (evt) {
-  console.log(evt);
-});
+var onGuestsSelectClick = function (evt) {
+  var formElement = evt.target;
+  var formCapacity = document.querySelector('#capacity');
+
+  if (formElement.value === '1') {
+    for (var q = 0; q < formCapacity.options.length; q++) {
+      if (formCapacity.options[q].value !== '1') {
+        formCapacity.options[q].disabled = true;
+      } else {
+        formCapacity.options[q].disabled = false;
+      }
+    }
+  }
+
+  if (formElement.value === '2') {
+    for (var w = 0; w < formCapacity.options.length; w++) {
+      if (formCapacity.options[w].value === '2' || formCapacity.options[w].value === '1') {
+        formCapacity.options[w].disabled = false;
+      } else {
+        formCapacity.options[w].disabled = true;
+      }
+    }
+  }
+
+  if (formElement.value === '3') {
+    for (var e = 0; e < formCapacity.options.length; e++) {
+      if (formCapacity.options[e].value === '3' || formCapacity.options[e].value === '2' || formCapacity.options[e].value === '1') {
+        formCapacity.options[e].disabled = false;
+      } else {
+        formCapacity.options[e].disabled = true;
+      }
+    }
+  }
+
+  if (formElement.value === '100') {
+    for (var r = 0; r < formCapacity.options.length; r++) {
+      if (formCapacity.options[r].value !== '0') {
+        formCapacity.options[r].disabled = true;
+      } else {
+        formCapacity.options[r].disabled = false;
+      }
+    }
+  }
+};
+
+roomSelect.addEventListener('change', onGuestsSelectClick);
+
+// при переходе страницы в активное состояние в поле адреса подставляются координаты острого конца метки;
+// при перемещении (mousemove) метки в поле адреса подставляются координаты острого конца метки
+// 4.2. Формат значения поля адреса: {{x}}, {{y}}, где {{x}} и {{y}} это координаты,
+// на которые метка указывает своим острым концом. Например, если метка .map__pin--main имеет CSS-координаты
+//  top: 200px; left: 300px, то в поле адрес должно быть записано значение 300 + расстояние до острого конца по горизонтали,
+//  200 + расстояние до острого конца по вертикали. Координаты не должны быть дробными.
+// 4.3. Для удобства пользователей значение Y-координаты адреса должно быть ограничено интервалом от 130 до 630.
+// Значение X-координаты адреса должно быть ограничено размерами блока, в котором перемещается метка.
+// 4.4. При ограничении перемещения метки по горизонтали её острый конец должен указывать на крайнюю точку блока.
+//  При выходе за границы блока часть метки скрывается. Скрытие реализовано стилями блока.
+
