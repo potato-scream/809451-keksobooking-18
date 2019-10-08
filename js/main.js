@@ -179,42 +179,20 @@ var onGuestsSelectClick = function (evt) {
   var formElement = evt.target;
   var formCapacity = document.querySelector('#capacity');
 
-  if (formElement.value === '1') {
-    for (var q = 0; q < formCapacity.options.length; q++) {
-      if (formCapacity.options[q].value !== '1') {
-        formCapacity.options[q].disabled = true;
-      } else {
-        formCapacity.options[q].disabled = false;
-      }
-    }
-  }
-
-  if (formElement.value === '2') {
-    for (var w = 0; w < formCapacity.options.length; w++) {
-      if (formCapacity.options[w].value === '2' || formCapacity.options[w].value === '1') {
-        formCapacity.options[w].disabled = false;
-      } else {
-        formCapacity.options[w].disabled = true;
-      }
-    }
-  }
-
-  if (formElement.value === '3') {
-    for (var e = 0; e < formCapacity.options.length; e++) {
-      if (formCapacity.options[e].value === '3' || formCapacity.options[e].value === '2' || formCapacity.options[e].value === '1') {
-        formCapacity.options[e].disabled = false;
-      } else {
-        formCapacity.options[e].disabled = true;
-      }
-    }
-  }
-
-  if (formElement.value === '100') {
+  if (+formElement.value !== 100) {
     for (var r = 0; r < formCapacity.options.length; r++) {
-      if (formCapacity.options[r].value !== '0') {
-        formCapacity.options[r].disabled = true;
+      if (formCapacity.options[r].value === '0') {
+        formCapacity.removeAttribute('disabled');
       } else {
-        formCapacity.options[r].disabled = false;
+        formCapacity.setAttribute('disabled', 'disabled');
+      }
+    }
+  } else {
+    for (var t = 0; t < formCapacity.options.length; t++) {
+      if (+formCapacity.options[t].value <= formElement.value) {
+        formCapacity.removeAttribute('disabled');
+      } else {
+        formCapacity.setAttribute('disabled', 'disabled');
       }
     }
   }
