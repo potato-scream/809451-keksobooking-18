@@ -4,6 +4,7 @@ var CARDS_NUMBER = 8;
 var PIN_HEIGHT = 70;
 var PIN_WIDTH = 50;
 var mainPin = document.querySelector('.map__pin--main');
+var roomSelect = document.querySelector('#room_number');
 
 var generateCards = function () {
   var adsArray = [];
@@ -143,9 +144,30 @@ var fillAddress = function () {
 };
 
 fillAddress();
-// Единственное доступное действие в неактивном состоянии — перемещение метки .map__pin--main,
-//  являющейся контролом указания адреса объявления.
-// Первое взаимодействие с меткой (mousedown) переводит страницу в активное состояние.
+
+// Функция блокирует и разблокирует элементы селекта выбора кол-ва комнат
+var dasableFormCapacity = function (formElement) {
+  var formCapacity = document.querySelector('#capacity');
+
+  if (+formElement.value === 100) {
+    for (var r = 0; r < formCapacity.options.length; r++) {
+      if (formCapacity.options[r].value === '0') {
+        formCapacity.options[r].removeAttribute('disabled');
+      } else {
+        formCapacity.options[r].setAttribute('disabled', 'disabled');
+      }
+    }
+  } else {
+    for (var t = 0; t < formCapacity.options.length; t++) {
+      if (+formCapacity.options[t].value <= formElement.value) {
+        formCapacity.options[t].removeAttribute('disabled');
+      } else {
+        formCapacity.options[t].setAttribute('disabled', 'disabled');
+      }
+    }
+  }
+};
+
 var onMainPinMousedown = function () {
   for (var a = 0; a < adFormFields.length; a++) {
     adFormFields[a].disabled = false;
@@ -163,6 +185,7 @@ var onMainPinMousedown = function () {
   addCardsToMap();
   formEnabled();
   fillAddress();
+  dasableFormCapacity(roomSelect);
 };
 
 document.addEventListener('keydown', function (evt) {
@@ -173,29 +196,8 @@ document.addEventListener('keydown', function (evt) {
 
 mainPin.addEventListener('mousedown', onMainPinMousedown);
 
-var roomSelect = document.querySelector('#room_number');
-
 var onGuestsSelectClick = function (evt) {
-  var formElement = evt.target;
-  var formCapacity = document.querySelector('#capacity');
-
-  if (+formElement.value !== 100) {
-    for (var r = 0; r < formCapacity.options.length; r++) {
-      if (formCapacity.options[r].value === '0') {
-        formCapacity.removeAttribute('disabled');
-      } else {
-        formCapacity.setAttribute('disabled', 'disabled');
-      }
-    }
-  } else {
-    for (var t = 0; t < formCapacity.options.length; t++) {
-      if (+formCapacity.options[t].value <= formElement.value) {
-        formCapacity.removeAttribute('disabled');
-      } else {
-        formCapacity.setAttribute('disabled', 'disabled');
-      }
-    }
-  }
+  dasableFormCapacity(evt.target);
 };
 
 roomSelect.addEventListener('change', onGuestsSelectClick);
