@@ -159,7 +159,7 @@ var dasableFormCapacity = function (formElement) {
     }
   } else {
     for (var t = 0; t < formCapacity.options.length; t++) {
-      if (+formCapacity.options[t].value <= formElement.value) {
+      if (+formCapacity.options[t].value <= formElement.value && +formCapacity.options[t].value > 0) {
         formCapacity.options[t].removeAttribute('disabled');
       } else {
         formCapacity.options[t].setAttribute('disabled', 'disabled');
