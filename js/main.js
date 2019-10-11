@@ -1,9 +1,15 @@
 
 'use strict';
+var CARDS_NUMBER = 8;
+var PIN_HEIGHT = 70;
+var PIN_WIDTH = 50;
+var mainPin = document.querySelector('.map__pin--main');
+var roomSelect = document.querySelector('#room_number');
+
 var generateCards = function () {
   var adsArray = [];
 
-  for (var i = 0; i < 8; i++) {
+  for (var i = 0; i < CARDS_NUMBER; i++) {
     var locationX = Math.floor(Math.random() * 1200);
     var locationY = Math.floor(Math.random() * 500) + 130;
     var accTypes = ['palace', 'flat', 'house', 'bungalo'];
@@ -64,8 +70,8 @@ var createCardElement = function (ad) {
   var card = pinTemplate.cloneNode(true);
 
   var mapPin = card.querySelector('.map__pin');
-  var x = ad.location.x - 50 / 2;
-  var y = ad.location.y - 70;
+  var x = ad.location.x - PIN_WIDTH / 2;
+  var y = ad.location.y - PIN_HEIGHT;
 
 
   mapPin.setAttribute('style', 'left: ' + x + 'px; top: ' + y + 'px;');
@@ -77,6 +83,7 @@ var createCardElement = function (ad) {
   return card;
 };
 
+// ФУНКЦИЯ ОТРИСОВКИ ПИНОВ КАРТОЧЕК
 var addCardsToMap = function () {
   var map = document.querySelector('.map');
   map.classList.remove('map--faded');
@@ -85,7 +92,7 @@ var addCardsToMap = function () {
 
   var ads = generateCards();
 
-  for (var h = 0; h < 8; h++) {
+  for (var h = 0; h < CARDS_NUMBER; h++) {
     var ad = ads[h];
 
     var card = createCardElement(ad);
@@ -96,4 +103,113 @@ var addCardsToMap = function () {
   mapPins.appendChild(cardsFragment);
 };
 
-addCardsToMap();
+var formEnabled = function () {
+  var form = document.querySelector('.ad-form');
+  form.classList.remove('ad-form--disabled');
+};
+
+
+// Блок с картой .map содержит класс map--faded;
+// Форма заполнения информации об объявлении .ad-form содержит класс ad-form--disabled;
+// Все <input> и <select> формы .ad-form заблокированы с помощью атрибута disabled,
+//  добавленного на них или на их родительские блоки fieldset;
+// Форма с фильтрами .map__filters заблокирована так же, как и форма .ad-form;
+
+var adFormFields = document.querySelectorAll('.ad-form .ad-form__element');
+for (var i = 0; i < adFormFields.length; i++) {
+  adFormFields[i].disabled = true;
+}
+
+var mapFiltersSelect = document.querySelectorAll('.map__filters .map__filter');
+for (var j = 0; j < mapFiltersSelect.length; j++) {
+  mapFiltersSelect[j].disabled = true;
+}
+
+var mapFiltersFields = document.querySelectorAll('.map__filters .map__features');
+for (var k = 0; k < mapFiltersFields.length; k++) {
+  mapFiltersFields[k].disabled = true;
+}
+
+var fillAddress = function () {
+  var address = document.querySelector('#address');
+  var map = document.querySelector('.map');
+  var MAIN_PIN_SIZE = 65;
+  var PIN_POINTER_HEIGHT = 22;
+
+  if (map.classList.contains('map--faded')) {
+    address.value = Math.floor(mainPin.offsetLeft + MAIN_PIN_SIZE / 2) + ', ' + Math.floor(mainPin.offsetTop + MAIN_PIN_SIZE / 2);
+  } else {
+    address.value = Math.floor(mainPin.offsetLeft + MAIN_PIN_SIZE / 2) + ', ' + Math.floor(mainPin.offsetTop + MAIN_PIN_SIZE + PIN_POINTER_HEIGHT);
+  }
+};
+
+fillAddress();
+
+// Функция блокирует и разблокирует элементы селекта выбора кол-ва комнат
+var dasableFormCapacity = function (formElement) {
+  var formCapacity = document.querySelector('#capacity');
+
+  if (+formElement.value === 100) {
+    for (var r = 0; r < formCapacity.options.length; r++) {
+      if (formCapacity.options[r].value === '0') {
+        formCapacity.options[r].removeAttribute('disabled');
+      } else {
+        formCapacity.options[r].setAttribute('disabled', 'disabled');
+      }
+    }
+  } else {
+    for (var t = 0; t < formCapacity.options.length; t++) {
+      if (+formCapacity.options[t].value <= formElement.value && +formCapacity.options[t].value > 0) {
+        formCapacity.options[t].removeAttribute('disabled');
+      } else {
+        formCapacity.options[t].setAttribute('disabled', 'disabled');
+      }
+    }
+  }
+};
+
+var onMainPinMousedown = function () {
+  for (var a = 0; a < adFormFields.length; a++) {
+    adFormFields[a].disabled = false;
+  }
+
+  for (var b = 0; b < mapFiltersSelect.length; b++) {
+    mapFiltersSelect[b].disabled = false;
+  }
+
+  for (var c = 0; c < mapFiltersFields.length; c++) {
+    mapFiltersFields[c].disabled = false;
+  }
+
+
+  addCardsToMap();
+  formEnabled();
+  fillAddress();
+  dasableFormCapacity(roomSelect);
+};
+
+document.addEventListener('keydown', function (evt) {
+  if (evt.keyCode === 13) {
+    onMainPinMousedown();
+  }
+});
+
+mainPin.addEventListener('mousedown', onMainPinMousedown);
+
+var onGuestsSelectClick = function (evt) {
+  dasableFormCapacity(evt.target);
+};
+
+roomSelect.addEventListener('change', onGuestsSelectClick);
+
+// при переходе страницы в активное состояние в поле адреса подставляются координаты острого конца метки;
+// при перемещении (mousemove) метки в поле адреса подставляются координаты острого конца метки
+// 4.2. Формат значения поля адреса: {{x}}, {{y}}, где {{x}} и {{y}} это координаты,
+// на которые метка указывает своим острым концом. Например, если метка .map__pin--main имеет CSS-координаты
+//  top: 200px; left: 300px, то в поле адрес должно быть записано значение 300 + расстояние до острого конца по горизонтали,
+//  200 + расстояние до острого конца по вертикали. Координаты не должны быть дробными.
+// 4.3. Для удобства пользователей значение Y-координаты адреса должно быть ограничено интервалом от 130 до 630.
+// Значение X-координаты адреса должно быть ограничено размерами блока, в котором перемещается метка.
+// 4.4. При ограничении перемещения метки по горизонтали её острый конец должен указывать на крайнюю точку блока.
+//  При выходе за границы блока часть метки скрывается. Скрытие реализовано стилями блока.
+
