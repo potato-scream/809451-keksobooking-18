@@ -1,12 +1,14 @@
-
 'use strict';
+
 var CARDS_NUMBER = 8;
 var PIN_HEIGHT = 70;
 var PIN_WIDTH = 50;
 var mainPin = document.querySelector('.map__pin--main');
 var roomSelect = document.querySelector('#room_number');
+var map = document.querySelector('.map');
 
-var generateCards = function () {
+// ГЕНЕРИРУЕТ МАССИВ ОБЪЯВЛЕНИЙ
+var generateAds = function () {
   var adsArray = [];
 
   for (var i = 0; i < CARDS_NUMBER; i++) {
@@ -30,7 +32,7 @@ var generateCards = function () {
       }
     }
 
-    var photosArrayLenth = Math.floor(Math.random() * 10) + 1; // 1
+    var photosArrayLenth = Math.floor(Math.random() * 3) + 1; // 1
     var photos = [];
 
     for (var k = 0; k < photosArrayLenth; k++) {
@@ -42,7 +44,7 @@ var generateCards = function () {
         'avatar': 'img/avatars/user0' + (i + 1) + '.png'
       },
       'offer': {
-        'title': '',
+        'title': 'Объявление №1',
         'address': locationX + ', ' + locationY,
         'price': 0,
         'type': accTypes[Math.floor(Math.random() * (accTypes.length - 1))],
@@ -51,7 +53,7 @@ var generateCards = function () {
         'checkin': checkinTimes[Math.floor(Math.random() * (checkinTimes.length - 1))],
         'checkout': checkoutTimes[Math.floor(Math.random() * (checkoutTimes.length - 1))],
         'features': randomFeaturesArray,
-        'description': '',
+        'description': 'Описание моё описание',
         'photos': photos
       },
       'location': {
@@ -61,41 +63,115 @@ var generateCards = function () {
     };
     adsArray.push(ad);
   }
-
   return adsArray;
 };
 
-var createCardElement = function (ad) {
-  var pinTemplate = document.querySelector('#pin').content;
-  var card = pinTemplate.cloneNode(true);
+var ads = generateAds();
 
-  var mapPin = card.querySelector('.map__pin');
+// СОЗДАЕТ 1 МАЛЕНЬКИЙ ПИН
+var createPinElement = function (ad) {
+  var pinTemplate = document.querySelector('#pin').content;
+  var pin = pinTemplate.cloneNode(true);
+
+  var mapPin = pin.querySelector('.map__pin');
   var x = ad.location.x - PIN_WIDTH / 2;
   var y = ad.location.y - PIN_HEIGHT;
 
 
   mapPin.setAttribute('style', 'left: ' + x + 'px; top: ' + y + 'px;');
 
-  var avatar = card.querySelector('img');
+  var avatar = pin.querySelector('img');
   avatar.setAttribute('src', ad.author.avatar);
   avatar.setAttribute('alt', ad.offer.title);
 
-  return card;
+  return pin;
 };
 
-// ФУНКЦИЯ ОТРИСОВКИ ПИНОВ КАРТОЧЕК
-var addCardsToMap = function () {
-  var map = document.querySelector('.map');
+// ДОБАВЛЯЕТ ПОПАП
+var addPopupElement = function (ad) {
+  var popupTemplate = document.querySelector('#card').content;
+  var popup = popupTemplate.cloneNode(true);
+
+  var popupTitle = popup.querySelector('.popup__title');
+  popupTitle.innerText = ad.offer.title;
+
+  var popupAddress = popup.querySelector('.popup__text--address');
+  popupAddress.innerText = ad.offer.address;
+
+  var popupPrice = popup.querySelector('.popup__text--price');
+  popupPrice.innerText = ad.offer.price + '₽/ночь';
+
+  var popupType = popup.querySelector('.popup__type');
+
+  var accTypes = {
+    'flat': 'Квартира',
+    'bungalo': 'Бунгало',
+    'house': 'Дом',
+    'palace': 'Дворец'
+  };
+
+  popupType.innerText = accTypes[ad.offer.type];
+
+  var popupTextCapacity = popup.querySelector('.popup__text--price');
+  popupTextCapacity.innerText = ad.offer.rooms + ' комнаты для ' + ad.offer.guests + ' гостей';
+
+  var popupTime = popup.querySelector('.popup__text--time');
+  popupTime.innerText = 'Заезд после ' + ad.offer.checkin + ', выезд до ' + ad.offer.checkout;
+
+  var popupFeatures = popup.querySelector('.popup__features');
+  popupFeatures.innerHTML = '';
+
+  var featuresFragment = document.createDocumentFragment();
+  for (var y = 0; y < ad.offer.features.length; y++) {
+    var li = document.createElement('li');
+    li.classList.add('popup__feature');
+    li.classList.add('popup__feature--' + ad.offer.features[y]);
+    featuresFragment.appendChild(li);
+  }
+  popupFeatures.appendChild(featuresFragment);
+
+  var popupDescription = popup.querySelector('.popup__description');
+  popupDescription.innerText = ad.offer.description;
+
+  var popupPhoto = popup.querySelector('.popup__photo');
+
+  var popupPhotos = popup.querySelector('.popup__photos');
+
+  var photosFragment = document.createDocumentFragment();
+  for (var u = 0; u < ad.offer.photos.length; u++) {
+    var photo = popupPhoto.cloneNode();
+    photo.setAttribute('src', ad.offer.photos[u]);
+    photosFragment.appendChild(photo);
+  }
+  popupPhotos.innerHTML = '';
+  popupPhotos.appendChild(photosFragment);
+
+  var popupAvatar = popup.querySelector('.popup__avatar');
+  popupAvatar.setAttribute('src', ad.author.avatar);
+
+  var mapFilters = document.querySelector('.map__filters-container');
+  map.insertBefore(popup, mapFilters);
+
+  var onPopupClose = function () {
+    document.querySelector('.popup').remove();
+  };
+
+  var popupClose = document.querySelector('.popup__close');
+  popupClose.addEventListener('mousedown', onPopupClose);
+
+};
+
+// ДОБАВЛЯЕТ ПИНЫ ОБЪЯВЛЕНИЙ НА КАРТУ
+
+var addPinsToMap = function () {
   map.classList.remove('map--faded');
 
   var cardsFragment = document.createDocumentFragment();
 
-  var ads = generateCards();
-
   for (var h = 0; h < CARDS_NUMBER; h++) {
     var ad = ads[h];
 
-    var card = createCardElement(ad);
+    var card = createPinElement(ad);
     cardsFragment.appendChild(card);
   }
 
@@ -103,18 +179,14 @@ var addCardsToMap = function () {
   mapPins.appendChild(cardsFragment);
 };
 
-var formEnabled = function () {
+// АКТИВИРУЕТ ФОРМУ
+
+var formEnable = function () {
   var form = document.querySelector('.ad-form');
   form.classList.remove('ad-form--disabled');
 };
 
-
-// Блок с картой .map содержит класс map--faded;
-// Форма заполнения информации об объявлении .ad-form содержит класс ad-form--disabled;
-// Все <input> и <select> формы .ad-form заблокированы с помощью атрибута disabled,
-//  добавленного на них или на их родительские блоки fieldset;
-// Форма с фильтрами .map__filters заблокирована так же, как и форма .ad-form;
-
+// БЛОКТИРУЕТ ЭЛЕМЕНТЫ ФОРМЫ В СОСТОЯНИИ ПО УМОЛЧАНИЮ
 var adFormFields = document.querySelectorAll('.ad-form .ad-form__element');
 for (var i = 0; i < adFormFields.length; i++) {
   adFormFields[i].disabled = true;
@@ -130,9 +202,9 @@ for (var k = 0; k < mapFiltersFields.length; k++) {
   mapFiltersFields[k].disabled = true;
 }
 
+// ДОБАВЛЯЕТ ЗНАЧЕНИЕ КООРДИНАТ БОЛЬШОГО ПИНА ПО КЛИКУ НА НЕГО В ПОЛЕ АДРЕСА
 var fillAddress = function () {
   var address = document.querySelector('#address');
-  var map = document.querySelector('.map');
   var MAIN_PIN_SIZE = 65;
   var PIN_POINTER_HEIGHT = 22;
 
@@ -168,6 +240,7 @@ var dasableFormCapacity = function (formElement) {
   }
 };
 
+// РАЗБЛОКИРУЕТ СТРАНИЦУ ПО НАЖАТИЮ НА БОЛЬШОЙ ПИН
 var onMainPinMousedown = function () {
   for (var a = 0; a < adFormFields.length; a++) {
     adFormFields[a].disabled = false;
@@ -181,11 +254,19 @@ var onMainPinMousedown = function () {
     mapFiltersFields[c].disabled = false;
   }
 
-
-  addCardsToMap();
-  formEnabled();
+  addPinsToMap();
+  formEnable();
   fillAddress();
   dasableFormCapacity(roomSelect);
+
+  var onPinMouseDown = function () {
+    addPopupElement(ads[0]);
+  };
+
+  var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+  for (var p = 0; p < pinList.length; p++) {
+    pinList[p].addEventListener('mousedown', onPinMouseDown);
+  }
 };
 
 document.addEventListener('keydown', function (evt) {
@@ -202,14 +283,20 @@ var onGuestsSelectClick = function (evt) {
 
 roomSelect.addEventListener('change', onGuestsSelectClick);
 
-// при переходе страницы в активное состояние в поле адреса подставляются координаты острого конца метки;
-// при перемещении (mousemove) метки в поле адреса подставляются координаты острого конца метки
-// 4.2. Формат значения поля адреса: {{x}}, {{y}}, где {{x}} и {{y}} это координаты,
-// на которые метка указывает своим острым концом. Например, если метка .map__pin--main имеет CSS-координаты
-//  top: 200px; left: 300px, то в поле адрес должно быть записано значение 300 + расстояние до острого конца по горизонтали,
-//  200 + расстояние до острого конца по вертикали. Координаты не должны быть дробными.
-// 4.3. Для удобства пользователей значение Y-координаты адреса должно быть ограничено интервалом от 130 до 630.
-// Значение X-координаты адреса должно быть ограничено размерами блока, в котором перемещается метка.
-// 4.4. При ограничении перемещения метки по горизонтали её острый конец должен указывать на крайнюю точку блока.
-//  При выходе за границы блока часть метки скрывается. Скрытие реализовано стилями блока.
+// но давай его будем показывать по клику на пин
 
+// то есть нужно вывоз функции addPopupElement сделать в обработчике события клика на кнопку с классом map__pin
+// (но при этом это не должен быть главный пин)...
+// ну и закрыть конечно нужно будет карточку по клику на крест
+
+// то есть также создать обработчик события клика на кнопку с классом popup__close
+
+// при этом нужно удалить это окно из дерева элементов
+
+// селектор для выбора кнопок-пинов может быть такой : .map__pin:not(.map__pin--main)
+
+// то есть команда document.querySelectorAll('.map__pin:not(.map__pin--main)')
+//  вернет все пины объявлений за исключеним главного большого пина
+// максимальный номер фото может быть 3, минимальный 1 , чтобы оставаться в этом диапазоне
+//  можно просто брать от случайного числа k брать отстаток от деления на три (это 0 1 или 2) и приплюсловать 1,
+//  так мы получим фото из допустимого набора
