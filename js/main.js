@@ -32,7 +32,7 @@ var generateAds = function () {
       }
     }
 
-    var photosArrayLenth = Math.floor(Math.random() * 10) + 1; // 1
+    var photosArrayLenth = Math.floor(Math.random() * 3) + 1; // 1
     var photos = [];
 
     for (var k = 0; k < photosArrayLenth; k++) {
@@ -63,7 +63,6 @@ var generateAds = function () {
     };
     adsArray.push(ad);
   }
-
   return adsArray;
 };
 
@@ -88,7 +87,7 @@ var createPinElement = function (ad) {
   return pin;
 };
 
-// ДОБАВЛЯЕТ КАРТОЧКУ ОБЪЯВЛЕНИЯ
+// ДОБАВЛЯЕТ ПОПАП
 var addPopupElement = function (ad) {
   var popupTemplate = document.querySelector('#card').content;
   var popup = popupTemplate.cloneNode(true);
@@ -152,6 +151,14 @@ var addPopupElement = function (ad) {
 
   var mapFilters = document.querySelector('.map__filters-container');
   map.insertBefore(popup, mapFilters);
+
+  var onPopupClose = function () {
+    document.querySelector('.popup').remove();
+  };
+
+  var popupClose = document.querySelector('.popup__close');
+  popupClose.addEventListener('mousedown', onPopupClose);
+
 };
 
 // ДОБАВЛЯЕТ ПИНЫ ОБЪЯВЛЕНИЙ НА КАРТУ
@@ -209,7 +216,6 @@ var fillAddress = function () {
 };
 
 fillAddress();
-addPopupElement(ads[0]);
 
 // Функция блокирует и разблокирует элементы селекта выбора кол-ва комнат
 var dasableFormCapacity = function (formElement) {
@@ -252,6 +258,15 @@ var onMainPinMousedown = function () {
   formEnable();
   fillAddress();
   dasableFormCapacity(roomSelect);
+
+  var onPinMouseDown = function () {
+    addPopupElement(ads[0]);
+  };
+
+  var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+  for (var p = 0; p < pinList.length; p++) {
+    pinList[p].addEventListener('mousedown', onPinMouseDown);
+  }
 };
 
 document.addEventListener('keydown', function (evt) {
@@ -268,3 +283,20 @@ var onGuestsSelectClick = function (evt) {
 
 roomSelect.addEventListener('change', onGuestsSelectClick);
 
+// но давай его будем показывать по клику на пин
+
+// то есть нужно вывоз функции addPopupElement сделать в обработчике события клика на кнопку с классом map__pin
+// (но при этом это не должен быть главный пин)...
+// ну и закрыть конечно нужно будет карточку по клику на крест
+
+// то есть также создать обработчик события клика на кнопку с классом popup__close
+
+// при этом нужно удалить это окно из дерева элементов
+
+// селектор для выбора кнопок-пинов может быть такой : .map__pin:not(.map__pin--main)
+
+// то есть команда document.querySelectorAll('.map__pin:not(.map__pin--main)')
+//  вернет все пины объявлений за исключеним главного большого пина
+// максимальный номер фото может быть 3, минимальный 1 , чтобы оставаться в этом диапазоне
+//  можно просто брать от случайного числа k брать отстаток от деления на три (это 0 1 или 2) и приплюсловать 1,
+//  так мы получим фото из допустимого набора
