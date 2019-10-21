@@ -87,6 +87,17 @@ var createPinElement = function (ad) {
   return pin;
 };
 
+// ЗАКРЫВАЕТ ПОПАП
+var onPopupClose = function () {
+  document.querySelector('.popup').remove();
+};
+
+document.addEventListener('keydown', function (evt) {
+  if (evt.keyCode === 27) {
+    onPopupClose();
+  }
+});
+
 // ДОБАВЛЯЕТ ПОПАП
 var addPopupElement = function (ad) {
   var popupTemplate = document.querySelector('#card').content;
@@ -152,17 +163,11 @@ var addPopupElement = function (ad) {
   var mapFilters = document.querySelector('.map__filters-container');
   map.insertBefore(popup, mapFilters);
 
-  var onPopupClose = function () {
-    document.querySelector('.popup').remove();
-  };
-
   var popupClose = document.querySelector('.popup__close');
   popupClose.addEventListener('mousedown', onPopupClose);
-
 };
 
 // ДОБАВЛЯЕТ ПИНЫ ОБЪЯВЛЕНИЙ НА КАРТУ
-
 var addPinsToMap = function () {
   map.classList.remove('map--faded');
 
@@ -170,7 +175,6 @@ var addPinsToMap = function () {
 
   for (var h = 0; h < CARDS_NUMBER; h++) {
     var ad = ads[h];
-
     var card = createPinElement(ad);
     cardsFragment.appendChild(card);
   }
@@ -240,8 +244,58 @@ var dasableFormCapacity = function (formElement) {
   }
 };
 
+// ФУНКЦИЯ МЕНЯЕТ МИНИМАЛЬНОЕ ЗНАЧЕНИЕ ЦЕНЫ В ЗАВИСИМОСТИ ОТ ТИПА ЖИЛЬЯ
+var selectType = document.querySelector('#type');
+var changeMinValue = function () {
+  var pricePerNight = document.querySelector('#price');
+  if (selectType.value === 'bungalo') {
+    pricePerNight.setAttribute('min', 0);
+    pricePerNight.setAttribute('placeholder', 0);
+  }
+  if (selectType.value === 'flat') {
+    pricePerNight.setAttribute('min', 1000);
+    pricePerNight.setAttribute('placeholder', 1000);
+  }
+  if (selectType.value === 'house') {
+    pricePerNight.setAttribute('min', 5000);
+    pricePerNight.setAttribute('placeholder', 5000);
+  }
+  if (selectType.value === 'palace') {
+    pricePerNight.setAttribute('min', 10000);
+    pricePerNight.setAttribute('placeholder', 10000);
+  }
+};
+// Поля «Время заезда» и «Время выезда» синхронизированы: при изменении значения одного поля, во втором выделяется соответствующее ему.
+// Например, если время заезда указано «после 14», то время выезда будет равно «до 14» и наоборот.
+// ФУНКЦИЯ МЕНЯЕТ ЗНАЧЕНИЕ ПОЛЯ ВРЕМЯ ЗАЕЗДА В ЗАВИСИМОСТИ ОТ  ВРЕМЕНИ ВЫЕЗДА И наоборот=
+var checkinTime = document.querySelector('#timein');
+var checkoutTime = document.querySelector('#timeout');
+
+checkinTime.addEventListener('change', function () {
+  checkoutTime.value = checkinTime.value;
+});
+checkoutTime.addEventListener('change', function () {
+  checkinTime.value = checkoutTime.value;
+});
+
+var wrapperClick = function (pin, pinNumber) {
+  pin.addEventListener('click', function () {
+    addPopupElement(ads[pinNumber]);
+  });
+};
+
+// var onPinKeyDown = function (evt) {
+//   if (evt.keyCode === 13) {
+//     onPinMouseDown();
+//   }
+// };
+
 // РАЗБЛОКИРУЕТ СТРАНИЦУ ПО НАЖАТИЮ НА БОЛЬШОЙ ПИН
 var onMainPinMousedown = function () {
+  if (!map.classList.contains('map--faded')) {
+    return;
+  }
+
   for (var a = 0; a < adFormFields.length; a++) {
     adFormFields[a].disabled = false;
   }
@@ -257,46 +311,21 @@ var onMainPinMousedown = function () {
   addPinsToMap();
   formEnable();
   fillAddress();
+  changeMinValue();
   dasableFormCapacity(roomSelect);
-
-  var onPinMouseDown = function () {
-    addPopupElement(ads[0]);
-  };
 
   var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
   for (var p = 0; p < pinList.length; p++) {
-    pinList[p].addEventListener('mousedown', onPinMouseDown);
+    wrapperClick(pinList[p], p);
   }
 };
 
-document.addEventListener('keydown', function (evt) {
-  if (evt.keyCode === 13) {
-    onMainPinMousedown();
-  }
-});
+mainPin.addEventListener('click', onMainPinMousedown);
 
-mainPin.addEventListener('mousedown', onMainPinMousedown);
 
 var onGuestsSelectClick = function (evt) {
   dasableFormCapacity(evt.target);
 };
 
 roomSelect.addEventListener('change', onGuestsSelectClick);
-
-// но давай его будем показывать по клику на пин
-
-// то есть нужно вывоз функции addPopupElement сделать в обработчике события клика на кнопку с классом map__pin
-// (но при этом это не должен быть главный пин)...
-// ну и закрыть конечно нужно будет карточку по клику на крест
-
-// то есть также создать обработчик события клика на кнопку с классом popup__close
-
-// при этом нужно удалить это окно из дерева элементов
-
-// селектор для выбора кнопок-пинов может быть такой : .map__pin:not(.map__pin--main)
-
-// то есть команда document.querySelectorAll('.map__pin:not(.map__pin--main)')
-//  вернет все пины объявлений за исключеним главного большого пина
-// максимальный номер фото может быть 3, минимальный 1 , чтобы оставаться в этом диапазоне
-//  можно просто брать от случайного числа k брать отстаток от деления на три (это 0 1 или 2) и приплюсловать 1,
-//  так мы получим фото из допустимого набора
+selectType.addEventListener('change', changeMinValue);
