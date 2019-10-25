@@ -43,7 +43,8 @@
   window.fillAddress();
 
   // Функция блокирует и разблокирует элементы селекта выбора кол-ва комнат
-  window.dasableFormCapacity = function (formElement) {
+  window.disableFormCapacity = function () {
+    var formElement = document.querySelector('#room_number');
     var formCapacity = document.querySelector('#capacity');
 
     if (+formElement.value === 100) {
@@ -101,7 +102,7 @@
   });
 
   var onGuestsSelectClick = function (evt) {
-    window.dasableFormCapacity(evt.target);
+    window.disableFormCapacity(evt.target);
   };
 
   roomSelect.addEventListener('change', onGuestsSelectClick);
