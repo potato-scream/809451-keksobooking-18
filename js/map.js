@@ -66,7 +66,6 @@
   };
 
   var mainPin = document.querySelector('.map__pin--main');
-  mainPin.addEventListener('click', onMainPinMousedown);
 
   // ДОБАВЛЯЕТ ПИНЫ ОБЪЯВЛЕНИЙ НА КАРТУ
   window.addPinsToMap = function (adsList) {
@@ -91,14 +90,12 @@
   });
 
   mainPin.addEventListener('click', onMainPinMousedown);
+  mainPin.addEventListener('mousedown', onMainPinMousedown);
 
   var MIN_MAP_WIDTH = 0;
   var MAX_MAP_WIDTH = document.querySelector('.map').offsetWidth;
   var MIN_MAP_HEIGHT = 130;
   var MAX_MAP_HEIGHT = 630;
-
-
-  var address = document.querySelector('#address');
 
   mainPin.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
@@ -131,7 +128,7 @@
         mainPin.style.left = MAX_MAP_WIDTH + 'px';
       }
 
-      address.value = mainPin.offsetLeft + ',' + mainPin.offsetTop;
+      window.fillAddress();
     };
 
     var onMouseUp = function (upEvt) {
@@ -140,7 +137,7 @@
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
 
-      address.value = mainPin.offsetLeft + ',' + mainPin.offsetTop;
+      window.fillAddress();
     };
 
     document.addEventListener('mousemove', onMouseMove);
