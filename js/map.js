@@ -15,7 +15,7 @@
     }
   };
 
-  var onMainPinMousedown = function () {
+  var enableMap = function () {
 
     if (!map.classList.contains('map--faded')) {
       return;
@@ -89,8 +89,7 @@
     }
   });
 
-  mainPin.addEventListener('click', onMainPinMousedown);
-  mainPin.addEventListener('mousedown', onMainPinMousedown);
+  mainPin.addEventListener('click', enableMap);
 
   var MIN_MAP_WIDTH = 0;
   var MAX_MAP_WIDTH = document.querySelector('.map').offsetWidth;
@@ -99,6 +98,7 @@
 
   mainPin.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
+    enableMap();
 
     var startCoordX = evt.clientX;
     var startCoordY = evt.clientY;
