@@ -5,7 +5,6 @@
 
 (function () {
   var map = document.querySelector('.map');
-  var ads = window.generateAds();
 
   // ЗАКРЫВАЕТ ПОПАП
   var onPopupClose = function () {
@@ -15,8 +14,14 @@
     }
   };
 
-  var enableMap = function () {
+  var showErrorMessage = function () {
+    var errorTemplate = document.querySelector('#error').content;
+    var errorMessage = errorTemplate.cloneNode(true);
+    var main = document.querySelector('main');
+    main.appendChild(errorMessage);
+  };
 
+  var enableMap = function () {
     if (!map.classList.contains('map--faded')) {
       return;
     }
@@ -36,21 +41,32 @@
       mapFiltersFields[c].disabled = false;
     }
 
+    window.getData(function (data) {
+      var ads = data.filter(function (item) {
+        return item.offer;
+      });
+      window.addPinsToMap(ads);
+      var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+      for (var p = 0; p < pinList.length; p++) {
+        wrapperClick(pinList[p], ads[p]);
+      }
+    }, function () {
+      showErrorMessage();
+    });
 
-    window.addPinsToMap(ads);
     window.formEnable();
     window.fillAddress();
     window.changeMinValue();
     window.disableFormCapacity();
 
     // ДОБАВЛЯЕТ ПОПАП
-    var wrapperClick = function (pin, pinNumber) {
+    var wrapperClick = function (pin, ad) {
       pin.addEventListener('click', function () {
         if (document.querySelector('.popup')) {
           onPopupClose();
         }
 
-        var popup = window.createPopupElement(ads[pinNumber]);
+        var popup = window.createPopupElement(ad);
         var mapFilters = document.querySelector('.map__filters-container');
         map.insertBefore(popup, mapFilters);
 
@@ -59,10 +75,6 @@
       });
     };
 
-    var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
-    for (var p = 0; p < pinList.length; p++) {
-      wrapperClick(pinList[p], p);
-    }
   };
 
   var mainPin = document.querySelector('.map__pin--main');
@@ -98,7 +110,6 @@
 
   mainPin.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
-    enableMap();
 
     var startCoordX = evt.clientX;
     var startCoordY = evt.clientY;
