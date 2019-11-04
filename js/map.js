@@ -41,7 +41,10 @@
       mapFiltersFields[c].disabled = false;
     }
 
-    window.getData(function (ads) {
+    window.getData(function (data) {
+      var ads = data.filter(function (item) {
+        return item.offer;
+      });
       window.addPinsToMap(ads);
       var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
       for (var p = 0; p < pinList.length; p++) {
