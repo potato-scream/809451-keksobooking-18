@@ -66,6 +66,38 @@
     }
   };
 
+  var clearForm = function () {
+    var formTitle = form.querySelector('#title');
+    formTitle.value = '';
+
+    var formType = form.querySelector('#type');
+    formType.value = 'flat';
+
+    var formPrice = form.querySelector('#price');
+    formPrice.value = '';
+
+    var formRoom = form.querySelector('#room_number');
+    formRoom.value = '1';
+
+    var formCapacity = form.querySelector('#capacity');
+    formCapacity.value = '1';
+
+    var formDescription = form.querySelector('#description');
+    formDescription.value = '';
+
+    var formtTimein = form.querySelector('#timein');
+    formtTimein.value = '12:00';
+
+    var formtTimeout = form.querySelector('#timeout');
+    formtTimeout.value = '12:00';
+
+    var checkboxes = form.querySelectorAll('.feature__checkbox');
+
+    for (var a = 0; a < checkboxes.length; a++) {
+      checkboxes[a].checked = false;
+    }
+  };
+
   // ФУНКЦИЯ МЕНЯЕТ МИНИМАЛЬНОЕ ЗНАЧЕНИЕ ЦЕНЫ В ЗАВИСИМОСТИ ОТ ТИПА ЖИЛЬЯ
   var selectType = document.querySelector('#type');
   window.changeMinValue = function () {
@@ -107,4 +139,80 @@
 
   roomSelect.addEventListener('change', onGuestsSelectClick);
   selectType.addEventListener('change', window.changeMinValue);
+
+  var main = document.querySelector('main');
+
+  var delSuccessMessage = function () {
+    var successSubmit = document.querySelector('.success');
+
+    if (successSubmit) {
+      main.removeChild(successSubmit);
+    }
+  };
+
+  var showSuccessMessage = function () {
+    var submitMessageTemplate = document.querySelector('#success').content;
+    var submitMessage = submitMessageTemplate.cloneNode(true);
+
+    main.appendChild(submitMessage);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.keyCode === 27) {
+        delSuccessMessage();
+      }
+    });
+
+    var successSubmit = document.querySelector('.success');
+
+    successSubmit.addEventListener('click', function () {
+      delSuccessMessage();
+    });
+  };
+
+  var delErrorMessage = function () {
+    var error = document.querySelector('.error');
+
+    if (error) {
+      main.removeChild(error);
+    }
+  };
+
+  var showErrorMessage = function () {
+    var errorMessageTemplate = document.querySelector('#error').content;
+    var errorMessage = errorMessageTemplate.cloneNode(true);
+
+    main.appendChild(errorMessage);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.keyCode === 27) {
+        delErrorMessage();
+      }
+    });
+
+    var error = document.querySelector('.error');
+    var errorButton = error.querySelector('.error__button');
+
+    error.addEventListener('click', function () {
+      delErrorMessage();
+    });
+
+    errorButton.addEventListener('click', function () {
+      delErrorMessage();
+    });
+  };
+
+  var form = document.querySelector('.ad-form');
+  form.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    var formData = new FormData(form);
+
+    window.submitData(formData, function () {
+      clearForm();
+      window.clearMap();
+      showSuccessMessage();
+    },
+    function () {
+      showErrorMessage();
+    });
+  });
 })();

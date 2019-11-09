@@ -154,5 +154,21 @@
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   });
+
+  window.clearMap = function () {
+    var mapPins = document.querySelector('.map__pins');
+    var pins = mapPins.querySelectorAll('.map__pin:not(.map__pin--main)');
+    for (var b = 0; b < pins.length; b++) {
+      mapPins.removeChild(pins[b]);
+    }
+
+    var card = document.querySelector('.map__card');
+    if (card) {
+      map.removeChild(card);
+    }
+
+    mainPin.setAttribute('style', 'left: 570px; top: 375px;');
+    window.fillAddress();
+  };
 })();
 
