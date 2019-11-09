@@ -23,4 +23,19 @@
     xhr.open('GET', 'https://js.dump.academy/keksobooking/data');
     xhr.send();
   };
+
+  window.submitData = function (data, onSuccess, onError) {
+    var xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+    xhr.addEventListener('load', function () {
+      if (xhr.status === 200) {
+        onSuccess(xhr.response);
+      } else {
+        onError();
+      }
+    });
+    xhr.addEventListener('error', onError);
+    xhr.open('POST', 'https://js.dump.academy/keksobookingk');
+    xhr.send(data);
+  };
 })();
