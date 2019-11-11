@@ -7,6 +7,9 @@
   var map = document.querySelector('.map');
   var ads = [];
   var accTypeFilter = 'any';
+  var PINS_NUMBER = 5;
+  var mainPin = document.querySelector('.map__pin--main');
+  var mapFilter = document.querySelector('.map__filter');
 
   window.clearMap = function () {
     var mapPins = document.querySelector('.map__pins');
@@ -24,7 +27,6 @@
     window.fillAddress();
   };
 
-  var mapFilter = document.querySelector('.map__filter');
   mapFilter.addEventListener('change', function (event) {
     accTypeFilter = event.target.value;
 
@@ -47,15 +49,20 @@
     });
   };
 
-  var updatePins = function () {
-    window.clearMap();
-    var filteredAds = ads.filter(function (item) {
+  var filterAds = function (adsList) {
+    var filteredAds = adsList.filter(function (item) {
       if (accTypeFilter === 'any') {
         return true;
       }
       return item.offer.type === accTypeFilter;
     });
-    filteredAds = filteredAds.slice(0, 5);
+    return filteredAds.slice(0, PINS_NUMBER);
+  };
+
+  var updatePins = function () {
+    window.clearMap();
+
+    var filteredAds = filterAds(ads);
 
     window.addPinsToMap(filteredAds);
     var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
@@ -115,8 +122,6 @@
     window.changeMinValue();
     window.disableFormCapacity();
   };
-
-  var mainPin = document.querySelector('.map__pin--main');
 
   // ДОБАВЛЯЕТ ПИНЫ ОБЪЯВЛЕНИЙ НА КАРТУ
   window.addPinsToMap = function (adsList) {
