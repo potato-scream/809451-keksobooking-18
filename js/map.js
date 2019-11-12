@@ -7,9 +7,17 @@
   var map = document.querySelector('.map');
   var ads = [];
   var accTypeFilter = 'any';
+  var priceFilter = 'any';
+  var roomsFilter = 'any';
+  var guestsFilter = 'any';
+  var features = [];
   var PINS_NUMBER = 5;
   var mainPin = document.querySelector('.map__pin--main');
-  var mapFilter = document.querySelector('.map__filter');
+  var accFilterSelect = document.querySelector('#housing-type');
+  var priceFilterSelect = document.querySelector('#housing-price');
+  var roomsFilterSelect = document.querySelector('#housing-rooms');
+  var guestsFilterSelect = document.querySelector('#housing-guests');
+  var featuresCheckboxes = document.querySelectorAll('.map__checkbox');
 
   window.clearMap = function () {
     var mapPins = document.querySelector('.map__pins');
@@ -27,11 +35,38 @@
     window.fillAddress();
   };
 
-  mapFilter.addEventListener('change', function (event) {
+  accFilterSelect.addEventListener('change', function (event) {
     accTypeFilter = event.target.value;
-
     updatePins();
   });
+
+  priceFilterSelect.addEventListener('change', function (event) {
+    priceFilter = event.target.value;
+    updatePins();
+  });
+
+  roomsFilterSelect.addEventListener('change', function (event) {
+    roomsFilter = event.target.value;
+    updatePins();
+  });
+
+  guestsFilterSelect.addEventListener('change', function (event) {
+    guestsFilter = event.target.value;
+    updatePins();
+  });
+
+  for (var i = 0; i < featuresCheckboxes.length; i++) {
+    featuresCheckboxes[i].addEventListener('change', function (event) {
+      if (event.target.checked === true && !features.includes(event.target.value)) {
+        features.push(event.target.value);
+      } else if (event.target.checked === false && features.includes(event.target.value)) {
+        var index = features.indexOf(event.target.value);
+        features.splice(index, 1);
+      }
+
+      updatePins();
+    });
+  }
 
   // ДОБАВЛЯЕТ ПОПАП
   var wrapperClick = function (pin, ad) {
@@ -50,12 +85,40 @@
   };
 
   var filterAds = function (adsList) {
-    var filteredAds = adsList.filter(function (item) {
-      if (accTypeFilter === 'any') {
-        return true;
-      }
-      return item.offer.type === accTypeFilter;
-    });
+    var filteredAds = adsList
+      .filter(function (item) {
+        if (accTypeFilter === 'any') {
+          return true;
+        }
+        return item.offer.type === accTypeFilter;
+      })
+      .filter(function (item) {
+        if (priceFilter === 'any') {
+          return true;
+        }
+        if (priceFilter === 'low') {
+          return item.offer.price <= 10000;
+        }
+        if (priceFilter === 'middle') {
+          return item.offer.price > 10000 && item.offer.price < 50000;
+        }
+        if (priceFilter === 'high') {
+          return item.offer.price >= 50000;
+        }
+        return false;
+      })
+      .filter(function (item) {
+        if (roomsFilter === 'any') {
+          return true;
+        }
+        return item.offer.rooms === +roomsFilter;
+      })
+      .filter(function (item) {
+        if (guestsFilter === 'any') {
+          return true;
+        }
+        return item.offer.guests === +guestsFilter;
+      });
     return filteredAds.slice(0, PINS_NUMBER);
   };
 
