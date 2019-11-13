@@ -19,6 +19,13 @@
   var guestsFilterSelect = document.querySelector('#housing-guests');
   var featuresCheckboxes = document.querySelectorAll('.map__checkbox');
 
+  var checkboxWifi = document.querySelector('#filter-wifi');
+  var checkboxDishwasher = document.querySelector('#filter-dishwasher');
+  var checkboxParking = document.querySelector('#filter-parking');
+  var checkboxWasher = document.querySelector('#filter-washer');
+  var checkboxElevator = document.querySelector('#filter-elevator');
+  var checkboxConditioner = document.querySelector('#filter-conditioner');
+
   window.clearMap = function () {
     var mapPins = document.querySelector('.map__pins');
     var pins = mapPins.querySelectorAll('.map__pin:not(.map__pin--main)');
@@ -118,11 +125,48 @@
           return true;
         }
         return item.offer.guests === +guestsFilter;
+      })
+      .filter(function (item) {
+        if (checkboxWifi.checked) {
+          return item.offer.features.includes('wifi');
+        }
+        return true;
+      })
+      .filter(function (item) {
+        if (checkboxDishwasher.checked) {
+          return item.offer.features.includes('dishwasher');
+        }
+        return true;
+      })
+      .filter(function (item) {
+        if (checkboxParking.checked) {
+          return item.offer.features.includes('parking');
+        }
+        return true;
+      })
+      .filter(function (item) {
+        if (checkboxWasher.checked) {
+          return item.offer.features.includes('washer');
+        }
+        return true;
+      })
+      .filter(function (item) {
+        if (checkboxElevator.checked) {
+          return item.offer.features.includes('elevator');
+        }
+        return true;
+      })
+      .filter(function (item) {
+        if (checkboxConditioner.checked) {
+          return item.offer.features.includes('conditioner');
+        }
+        return true;
       });
+
     return filteredAds.slice(0, PINS_NUMBER);
   };
 
-  var updatePins = function () {
+  var updatePins = window.debounce(function () {
     window.clearMap();
 
     var filteredAds = filterAds(ads);
@@ -130,9 +174,9 @@
     window.addPinsToMap(filteredAds);
     var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
     for (var p = 0; p < pinList.length; p++) {
-      wrapperClick(pinList[p], ads[p]);
+      wrapperClick(pinList[p], filteredAds[p]);
     }
-  };
+  });
 
   // ЗАКРЫВАЕТ ПОПАП
   var onPopupClose = function () {
