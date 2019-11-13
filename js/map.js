@@ -16,6 +16,7 @@
   var priceFilterSelect = document.querySelector('#housing-price');
   var roomsFilterSelect = document.querySelector('#housing-rooms');
   var guestsFilterSelect = document.querySelector('#housing-guests');
+  var featuresCheckboxes = document.querySelectorAll('.map__checkbox');
 
   var checkboxWifi = document.querySelector('#filter-wifi');
   var checkboxDishwasher = document.querySelector('#filter-dishwasher');
@@ -59,6 +60,12 @@
     guestsFilter = event.target.value;
     updatePins();
   });
+
+  for (var i = 0; i < featuresCheckboxes.length; i++) {
+    featuresCheckboxes[i].addEventListener('change', function () {
+      updatePins();
+    });
+  }
 
   // ДОБАВЛЯЕТ ПОПАП
   var wrapperClick = function (pin, ad) {
