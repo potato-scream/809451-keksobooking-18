@@ -10,7 +10,6 @@
   var priceFilter = 'any';
   var roomsFilter = 'any';
   var guestsFilter = 'any';
-  var features = [];
   var PINS_NUMBER = 5;
   var mainPin = document.querySelector('.map__pin--main');
   var accFilterSelect = document.querySelector('#housing-type');
