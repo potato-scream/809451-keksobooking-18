@@ -215,4 +215,10 @@
       showErrorMessage();
     });
   });
+
+  var resetButton = document.querySelector('.ad-form__reset');
+  resetButton.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    clearForm();
+  });
 })();
