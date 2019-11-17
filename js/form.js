@@ -53,10 +53,6 @@
     }
   };
 
-  // БЛОКТИРУЕТ ЭЛЕМЕНТЫ ФОРМЫ В СОСТОЯНИИ ПО УМОЛЧАНИЮ
-  disableForm();
-  window.fillAddress();
-
   // Функция блокирует и разблокирует элементы селекта выбора кол-ва комнат
   window.disableFormCapacity = function () {
     if (+formRoom.value === 100) {
@@ -224,4 +220,8 @@
     window.clearMap();
     disableForm();
   });
+
+  // БЛОКТИРУЕТ ЭЛЕМЕНТЫ ФОРМЫ В СОСТОЯНИИ ПО УМОЛЧАНИЮ
+  disableForm();
+  window.fillAddress();
 })();
