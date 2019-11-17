@@ -1,7 +1,21 @@
 'use strict';
 // модуль, который работает с формой объявления.
 (function () {
-  var roomSelect = document.querySelector('#room_number');
+  var form = document.querySelector('.ad-form');
+  var adFormFields = document.querySelectorAll('.ad-form .ad-form__element');
+  var formTitle = form.querySelector('#title');
+  var formType = form.querySelector('#type');
+  var formPrice = form.querySelector('#price');
+  var formRoom = form.querySelector('#room_number');
+  var formCapacity = form.querySelector('#capacity');
+  var formDescription = form.querySelector('#description');
+  var formTimein = form.querySelector('#timein');
+  var formTimeout = form.querySelector('#timeout');
+  var checkboxes = form.querySelectorAll('.feature__checkbox');
+  var mapFiltersSelect = document.querySelectorAll('.map__filters .map__filter');
+  var mapFiltersFields = document.querySelectorAll('.map__filters .map__features');
+  var resetButton = document.querySelector('.ad-form__reset');
+  var main = document.querySelector('main');
 
   // ДОБАВЛЯЕТ ЗНАЧЕНИЕ КООРДИНАТ БОЛЬШОГО ПИНА ПО КЛИКУ НА НЕГО В ПОЛЕ АДРЕСА
   window.fillAddress = function () {
@@ -19,40 +33,33 @@
   };
 
   // АКТИВИРУЕТ ФОРМУ
-  window.formEnable = function () {
-    var form = document.querySelector('.ad-form');
+  window.enableForm = function () {
     form.classList.remove('ad-form--disabled');
   };
 
-  var formDisable = function () {
-    var form = document.querySelector('.ad-form');
+  var disableForm = function () {
     form.classList.add('ad-form--disabled');
+
+    for (var i = 0; i < adFormFields.length; i++) {
+      adFormFields[i].disabled = true;
+    }
+
+    for (var j = 0; j < mapFiltersSelect.length; j++) {
+      mapFiltersSelect[j].disabled = true;
+    }
+
+    for (var k = 0; k < mapFiltersFields.length; k++) {
+      mapFiltersFields[k].disabled = true;
+    }
   };
 
   // БЛОКТИРУЕТ ЭЛЕМЕНТЫ ФОРМЫ В СОСТОЯНИИ ПО УМОЛЧАНИЮ
-  var adFormFields = document.querySelectorAll('.ad-form .ad-form__element');
-  for (var i = 0; i < adFormFields.length; i++) {
-    adFormFields[i].disabled = true;
-  }
-
-  var mapFiltersSelect = document.querySelectorAll('.map__filters .map__filter');
-  for (var j = 0; j < mapFiltersSelect.length; j++) {
-    mapFiltersSelect[j].disabled = true;
-  }
-
-  var mapFiltersFields = document.querySelectorAll('.map__filters .map__features');
-  for (var k = 0; k < mapFiltersFields.length; k++) {
-    mapFiltersFields[k].disabled = true;
-  }
-
+  disableForm();
   window.fillAddress();
 
   // Функция блокирует и разблокирует элементы селекта выбора кол-ва комнат
   window.disableFormCapacity = function () {
-    var formElement = document.querySelector('#room_number');
-    var formCapacity = document.querySelector('#capacity');
-
-    if (+formElement.value === 100) {
+    if (+formRoom.value === 100) {
       for (var r = 0; r < formCapacity.options.length; r++) {
         if (formCapacity.options[r].value === '0') {
           formCapacity.options[r].removeAttribute('disabled');
@@ -62,7 +69,7 @@
       }
     } else {
       for (var t = 0; t < formCapacity.options.length; t++) {
-        if (+formCapacity.options[t].value <= formElement.value && +formCapacity.options[t].value > 0) {
+        if (+formCapacity.options[t].value <= formRoom.value && +formCapacity.options[t].value > 0) {
           formCapacity.options[t].removeAttribute('disabled');
         } else {
           formCapacity.options[t].setAttribute('disabled', 'disabled');
@@ -72,31 +79,14 @@
   };
 
   var clearForm = function () {
-    var formTitle = form.querySelector('#title');
     formTitle.value = '';
-
-    var formType = form.querySelector('#type');
     formType.value = 'flat';
-
-    var formPrice = form.querySelector('#price');
     formPrice.value = '';
-
-    var formRoom = form.querySelector('#room_number');
     formRoom.value = '1';
-
-    var formCapacity = form.querySelector('#capacity');
     formCapacity.value = '1';
-
-    var formDescription = form.querySelector('#description');
     formDescription.value = '';
-
-    var formtTimein = form.querySelector('#timein');
-    formtTimein.value = '12:00';
-
-    var formtTimeout = form.querySelector('#timeout');
-    formtTimeout.value = '12:00';
-
-    var checkboxes = form.querySelectorAll('.feature__checkbox');
+    formTimein.value = '12:00';
+    formTimeout.value = '12:00';
 
     for (var a = 0; a < checkboxes.length; a++) {
       checkboxes[a].checked = false;
@@ -118,48 +108,42 @@
   };
 
   // ФУНКЦИЯ МЕНЯЕТ МИНИМАЛЬНОЕ ЗНАЧЕНИЕ ЦЕНЫ В ЗАВИСИМОСТИ ОТ ТИПА ЖИЛЬЯ
-  var selectType = document.querySelector('#type');
   window.changeMinValue = function () {
-    var pricePerNight = document.querySelector('#price');
-    if (selectType.value === 'bungalo') {
-      pricePerNight.setAttribute('min', 0);
-      pricePerNight.setAttribute('placeholder', 0);
+    if (formType.value === 'bungalo') {
+      formPrice.setAttribute('min', 0);
+      formPrice.setAttribute('placeholder', 0);
     }
-    if (selectType.value === 'flat') {
-      pricePerNight.setAttribute('min', 1000);
-      pricePerNight.setAttribute('placeholder', 1000);
+    if (formType.value === 'flat') {
+      formPrice.setAttribute('min', 1000);
+      formPrice.setAttribute('placeholder', 1000);
     }
-    if (selectType.value === 'house') {
-      pricePerNight.setAttribute('min', 5000);
-      pricePerNight.setAttribute('placeholder', 5000);
+    if (formType.value === 'house') {
+      formPrice.setAttribute('min', 5000);
+      formPrice.setAttribute('placeholder', 5000);
     }
-    if (selectType.value === 'palace') {
-      pricePerNight.setAttribute('min', 10000);
-      pricePerNight.setAttribute('placeholder', 10000);
+    if (formType.value === 'palace') {
+      formPrice.setAttribute('min', 10000);
+      formPrice.setAttribute('placeholder', 10000);
     }
   };
 
   // Поля «Время заезда» и «Время выезда» синхронизированы: при изменении значения одного поля, во втором выделяется соответствующее ему.
   // Например, если время заезда указано «после 14», то время выезда будет равно «до 14» и наоборот.
   // ФУНКЦИЯ МЕНЯЕТ ЗНАЧЕНИЕ ПОЛЯ ВРЕМЯ ЗАЕЗДА В ЗАВИСИМОСТИ ОТ  ВРЕМЕНИ ВЫЕЗДА И наоборот=
-  var checkinTime = document.querySelector('#timein');
-  var checkoutTime = document.querySelector('#timeout');
-
-  checkinTime.addEventListener('change', function () {
-    checkoutTime.value = checkinTime.value;
+  formTimein.addEventListener('change', function () {
+    formTimeout.value = formTimein.value;
   });
-  checkoutTime.addEventListener('change', function () {
-    checkinTime.value = checkoutTime.value;
+  formTimeout.addEventListener('change', function () {
+    formTimein.value = formTimeout.value;
   });
 
   var onGuestsSelectClick = function (evt) {
     window.disableFormCapacity(evt.target);
   };
 
-  roomSelect.addEventListener('change', onGuestsSelectClick);
-  selectType.addEventListener('change', window.changeMinValue);
+  formRoom.addEventListener('change', onGuestsSelectClick);
+  formType.addEventListener('change', window.changeMinValue);
 
-  var main = document.querySelector('main');
 
   var delSuccessMessage = function () {
     var successSubmit = document.querySelector('.success');
@@ -199,6 +183,8 @@
   var showErrorMessage = function () {
     var errorMessageTemplate = document.querySelector('#error').content;
     var errorMessage = errorMessageTemplate.cloneNode(true);
+    var error = document.querySelector('.error');
+    var errorButton = error.querySelector('.error__button');
 
     main.appendChild(errorMessage);
 
@@ -207,9 +193,6 @@
         delErrorMessage();
       }
     });
-
-    var error = document.querySelector('.error');
-    var errorButton = error.querySelector('.error__button');
 
     error.addEventListener('click', function () {
       delErrorMessage();
@@ -220,7 +203,6 @@
     });
   };
 
-  var form = document.querySelector('.ad-form');
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
     var formData = new FormData(form);
@@ -228,7 +210,7 @@
     window.submitData(formData, function () {
       clearForm();
       window.clearMap();
-      formDisable();
+      disableForm();
       showSuccessMessage();
     },
     function () {
@@ -236,12 +218,10 @@
     });
   });
 
-  var resetButton = document.querySelector('.ad-form__reset');
-
   resetButton.addEventListener('click', function (evt) {
     evt.preventDefault();
     clearForm();
     window.clearMap();
-    formDisable();
+    disableForm();
   });
 })();

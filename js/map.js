@@ -25,6 +25,12 @@
   var checkboxElevator = document.querySelector('#filter-elevator');
   var checkboxConditioner = document.querySelector('#filter-conditioner');
 
+  var MIN_MAP_WIDTH = 0;
+  var MAX_MAP_WIDTH = document.querySelector('.map').offsetWidth;
+  var MIN_MAP_HEIGHT = 130;
+  var MAX_MAP_HEIGHT = 630;
+
+
   window.clearMap = function () {
     var mapPins = document.querySelector('.map__pins');
     var pins = mapPins.querySelectorAll('.map__pin:not(.map__pin--main)');
@@ -75,6 +81,13 @@
       if (document.querySelector('.popup')) {
         onPopupClose();
       }
+
+      var activePin = document.querySelector('.map__pin.map__pin--active');
+      if (activePin) {
+        activePin.classList.remove('map__pin--active');
+      }
+
+      pin.classList.add('map__pin--active');
 
       var popup = window.createPopupElement(ad);
       var mapFilters = document.querySelector('.map__filters-container');
@@ -218,7 +231,7 @@
       showErrorMessage();
     });
 
-    window.formEnable();
+    window.enableForm();
     window.fillAddress();
     window.changeMinValue();
     window.disableFormCapacity();
@@ -247,11 +260,6 @@
   });
 
   mainPin.addEventListener('click', enableMap);
-
-  var MIN_MAP_WIDTH = 0;
-  var MAX_MAP_WIDTH = document.querySelector('.map').offsetWidth;
-  var MIN_MAP_HEIGHT = 130;
-  var MAX_MAP_HEIGHT = 630;
 
   mainPin.addEventListener('mousedown', function (evt) {
     evt.preventDefault();

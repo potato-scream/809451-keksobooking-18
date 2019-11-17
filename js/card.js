@@ -6,15 +6,20 @@
     var popup = popupTemplate.cloneNode(true);
 
     var popupTitle = popup.querySelector('.popup__title');
-    popupTitle.innerText = ad.offer.title;
-
     var popupAddress = popup.querySelector('.popup__text--address');
-    popupAddress.innerText = ad.offer.address;
-
     var popupPrice = popup.querySelector('.popup__text--price');
-    popupPrice.innerText = ad.offer.price + '₽/ночь';
-
     var popupType = popup.querySelector('.popup__type');
+    var popupTextCapacity = popup.querySelector('.popup__text--price');
+    var popupTime = popup.querySelector('.popup__text--time');
+    var popupFeatures = popup.querySelector('.popup__features');
+    var popupDescription = popup.querySelector('.popup__description');
+    var popupPhoto = popup.querySelector('.popup__photo');
+    var popupPhotos = popup.querySelector('.popup__photos');
+    var popupAvatar = popup.querySelector('.popup__avatar');
+
+    popupTitle.innerText = ad.offer.title;
+    popupAddress.innerText = ad.offer.address;
+    popupPrice.innerText = ad.offer.price + '₽/ночь';
 
     if (ad.offer.type === 'flat') {
       popupType.innerText = 'Квартира';
@@ -26,13 +31,10 @@
       popupType.innerText = 'Дворец';
     }
 
-    var popupTextCapacity = popup.querySelector('.popup__text--price');
     popupTextCapacity.innerText = ad.offer.rooms + ' комнаты для ' + ad.offer.guests + ' гостей';
 
-    var popupTime = popup.querySelector('.popup__text--time');
     popupTime.innerText = 'Заезд после ' + ad.offer.checkin + ', выезд до ' + ad.offer.checkout;
 
-    var popupFeatures = popup.querySelector('.popup__features');
     popupFeatures.innerHTML = '';
 
     var featuresFragment = document.createDocumentFragment();
@@ -45,12 +47,7 @@
 
     popupFeatures.appendChild(featuresFragment);
 
-    var popupDescription = popup.querySelector('.popup__description');
     popupDescription.innerText = ad.offer.description;
-
-    var popupPhoto = popup.querySelector('.popup__photo');
-
-    var popupPhotos = popup.querySelector('.popup__photos');
 
     var photosFragment = document.createDocumentFragment();
     for (var u = 0; u < ad.offer.photos.length; u++) {
@@ -61,7 +58,6 @@
     popupPhotos.innerHTML = '';
     popupPhotos.appendChild(photosFragment);
 
-    var popupAvatar = popup.querySelector('.popup__avatar');
     popupAvatar.setAttribute('src', ad.author.avatar);
     return popup;
   };
