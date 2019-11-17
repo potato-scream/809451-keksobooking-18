@@ -37,6 +37,8 @@
       map.removeChild(card);
     }
 
+    map.classList.add('map--faded');
+
     mainPin.setAttribute('style', 'left: 570px; top: 375px;');
     window.fillAddress();
   };

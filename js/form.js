@@ -24,6 +24,11 @@
     form.classList.remove('ad-form--disabled');
   };
 
+  var formDisable = function () {
+    var form = document.querySelector('.ad-form');
+    form.classList.add('ad-form--disabled');
+  };
+
   // БЛОКТИРУЕТ ЭЛЕМЕНТЫ ФОРМЫ В СОСТОЯНИИ ПО УМОЛЧАНИЮ
   var adFormFields = document.querySelectorAll('.ad-form .ad-form__element');
   for (var i = 0; i < adFormFields.length; i++) {
@@ -223,6 +228,7 @@
     window.submitData(formData, function () {
       clearForm();
       window.clearMap();
+      formDisable();
       showSuccessMessage();
     },
     function () {
@@ -235,5 +241,7 @@
   resetButton.addEventListener('click', function (evt) {
     evt.preventDefault();
     clearForm();
+    window.clearMap();
+    formDisable();
   });
 })();
