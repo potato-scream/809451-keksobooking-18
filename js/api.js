@@ -35,7 +35,7 @@
       }
     });
     xhr.addEventListener('error', onError);
-    xhr.open('POST', 'https://js.dump.academy/keksobookingk');
+    xhr.open('POST', 'https://js.dump.academy/keksobooking');
     xhr.send(data);
   };
 })();
