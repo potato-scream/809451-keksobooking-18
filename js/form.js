@@ -96,6 +96,20 @@
     for (var a = 0; a < checkboxes.length; a++) {
       checkboxes[a].checked = false;
     }
+
+    var userpicPreview = document.querySelector('.ad-form-header__preview img');
+    userpicPreview.src = 'img/muffin-grey.svg';
+
+    var accPreviewContainer = document.querySelector('.ad-form__photo-container');
+    var accPreviewImages = accPreviewContainer.querySelectorAll('.ad-form__photo');
+
+    for (var b = 0; b < accPreviewImages.length; b++) {
+      accPreviewContainer.removeChild(accPreviewImages[b]);
+    }
+
+    var adFormPhoto = document.createElement('div');
+    adFormPhoto.setAttribute('class', 'ad-form__photo');
+    accPreviewContainer.appendChild(adFormPhoto);
   };
 
   // ФУНКЦИЯ МЕНЯЕТ МИНИМАЛЬНОЕ ЗНАЧЕНИЕ ЦЕНЫ В ЗАВИСИМОСТИ ОТ ТИПА ЖИЛЬЯ
@@ -217,6 +231,7 @@
   });
 
   var resetButton = document.querySelector('.ad-form__reset');
+
   resetButton.addEventListener('click', function (evt) {
     evt.preventDefault();
     clearForm();
