@@ -40,19 +40,19 @@
       var reader = new FileReader();
 
       reader.addEventListener('load', function () {
-        var accPic = document.createElement('img');
-        accPic.setAttribute('width', '70px');
-        accPic.setAttribute('height', '70px');
-        accPic.src = reader.result;
+        var accomodationPicture = document.createElement('img');
+        accomodationPicture.setAttribute('width', '70px');
+        accomodationPicture.setAttribute('height', '70px');
+        accomodationPicture.src = reader.result;
 
         if (accPreview.firstChild && accPreview.firstChild.tagName === 'IMG') {
           var adFormPhoto = document.createElement('div');
           var accContainer = document.querySelector('.ad-form__photo-container');
           accContainer.appendChild(adFormPhoto);
           adFormPhoto.setAttribute('class', 'ad-form__photo');
-          adFormPhoto.appendChild(accPic);
+          adFormPhoto.appendChild(accomodationPicture);
         } else {
-          accPreview.appendChild(accPic);
+          accPreview.appendChild(accomodationPicture);
         }
       });
 

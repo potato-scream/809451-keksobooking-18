@@ -1,15 +1,16 @@
 'use strict';
-// модуль, который управляет карточками объявлений и пинами:
-// добавляет на страницу нужную карточку, отрисовывает пины
-// и осуществляет взаимодействие карточки и метки на карте;
 
 (function () {
+  var ESCAPE = 27;
+  var LOW_PRICE_LIMIT = 10000;
+  var HIGH_PRICE_LIMIT = 50000;
+  var ANY = 'any';
   var map = document.querySelector('.map');
-  var ads = [];
-  var accTypeFilter = 'any';
-  var priceFilter = 'any';
-  var roomsFilter = 'any';
-  var guestsFilter = 'any';
+  var advertisements = [];
+  var accomodationTypeFilter = ANY;
+  var priceFilter = ANY;
+  var roomsFilter = ANY;
+  var guestsFilter = ANY;
   var PINS_NUMBER = 5;
   var mainPin = document.querySelector('.map__pin--main');
   var accFilterSelect = document.querySelector('#housing-type');
@@ -29,28 +30,11 @@
   var MAX_MAP_WIDTH = document.querySelector('.map').offsetWidth;
   var MIN_MAP_HEIGHT = 130;
   var MAX_MAP_HEIGHT = 630;
-
-
-  window.clearMap = function () {
-    var mapPins = document.querySelector('.map__pins');
-    var pins = mapPins.querySelectorAll('.map__pin:not(.map__pin--main)');
-    for (var b = 0; b < pins.length; b++) {
-      mapPins.removeChild(pins[b]);
-    }
-
-    var card = document.querySelector('.map__card');
-    if (card) {
-      map.removeChild(card);
-    }
-
-    map.classList.add('map--faded');
-
-    mainPin.setAttribute('style', 'left: 570px; top: 375px;');
-    window.fillAddress();
-  };
+  var MAIN_PIN_SIZE = 65;
+  var PIN_POINTER_HEIGHT = 22;
 
   accFilterSelect.addEventListener('change', function (event) {
-    accTypeFilter = event.target.value;
+    accomodationTypeFilter = event.target.value;
     updatePins();
   });
 
@@ -70,13 +54,10 @@
   });
 
   for (var i = 0; i < featuresCheckboxes.length; i++) {
-    featuresCheckboxes[i].addEventListener('change', function () {
-      updatePins();
-    });
+    featuresCheckboxes[i].addEventListener('change', updatePins);
   }
 
-  // ДОБАВЛЯЕТ ПОПАП
-  var wrapperClick = function (pin, ad) {
+  var wrapperClick = function (pin, advertisement) {
     pin.addEventListener('click', function () {
       if (document.querySelector('.popup')) {
         onPopupClose();
@@ -89,7 +70,7 @@
 
       pin.classList.add('map__pin--active');
 
-      var popup = window.createPopupElement(ad);
+      var popup = window.cardUtil.createPopupElement(advertisement);
       var mapFilters = document.querySelector('.map__filters-container');
       map.insertBefore(popup, mapFilters);
 
@@ -101,91 +82,63 @@
   var filterAds = function (adsList) {
     var filteredAds = adsList
       .filter(function (item) {
-        if (accTypeFilter === 'any') {
-          return true;
-        }
-        return item.offer.type === accTypeFilter;
+        return accomodationTypeFilter === ANY ? true : item.offer.type === accomodationTypeFilter;
       })
       .filter(function (item) {
-        if (priceFilter === 'any') {
+        if (priceFilter === ANY) {
           return true;
         }
         if (priceFilter === 'low') {
-          return item.offer.price <= 10000;
+          return item.offer.price <= LOW_PRICE_LIMIT;
         }
         if (priceFilter === 'middle') {
-          return item.offer.price > 10000 && item.offer.price < 50000;
+          return item.offer.price > LOW_PRICE_LIMIT && item.offer.price < HIGH_PRICE_LIMIT;
         }
         if (priceFilter === 'high') {
-          return item.offer.price >= 50000;
+          return item.offer.price >= HIGH_PRICE_LIMIT;
         }
         return false;
       })
       .filter(function (item) {
-        if (roomsFilter === 'any') {
-          return true;
-        }
-        return item.offer.rooms === +roomsFilter;
+        return roomsFilter === ANY ? true : item.offer.rooms === +roomsFilter;
       })
       .filter(function (item) {
-        if (guestsFilter === 'any') {
-          return true;
-        }
-        return item.offer.guests === +guestsFilter;
+        return guestsFilter === ANY ? true : item.offer.guests === +guestsFilter;
       })
       .filter(function (item) {
-        if (checkboxWifi.checked) {
-          return item.offer.features.includes('wifi');
-        }
-        return true;
+        return checkboxWifi.checked ? item.offer.features.includes('wifi') : true;
       })
       .filter(function (item) {
-        if (checkboxDishwasher.checked) {
-          return item.offer.features.includes('dishwasher');
-        }
-        return true;
+        return checkboxDishwasher.checked ? item.offer.features.includes('dishwasher') : true;
       })
       .filter(function (item) {
-        if (checkboxParking.checked) {
-          return item.offer.features.includes('parking');
-        }
-        return true;
+        return checkboxParking.checked ? item.offer.features.includes('parking') : true;
       })
       .filter(function (item) {
-        if (checkboxWasher.checked) {
-          return item.offer.features.includes('washer');
-        }
-        return true;
+        return checkboxWasher.checked ? item.offer.features.includes('washer') : true;
       })
       .filter(function (item) {
-        if (checkboxElevator.checked) {
-          return item.offer.features.includes('elevator');
-        }
-        return true;
+        return checkboxElevator.checked ? item.offer.features.includes('elevator') : true;
       })
       .filter(function (item) {
-        if (checkboxConditioner.checked) {
-          return item.offer.features.includes('conditioner');
-        }
-        return true;
+        return checkboxConditioner.checked ? item.offer.features.includes('conditioner') : true;
       });
 
     return filteredAds.slice(0, PINS_NUMBER);
   };
 
-  var updatePins = window.debounce(function () {
-    window.clearMap();
+  var updatePins = window.debounceUtil.debounce(function () {
+    window.mapUtil.clearMap();
 
-    var filteredAds = filterAds(ads);
+    var filteredAds = filterAds(advertisements);
 
-    window.addPinsToMap(filteredAds);
+    window.mapUtil.addPinsToMap(filteredAds);
     var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
     for (var p = 0; p < pinList.length; p++) {
       wrapperClick(pinList[p], filteredAds[p]);
     }
   });
 
-  // ЗАКРЫВАЕТ ПОПАП
   var onPopupClose = function () {
     var popupElement = document.querySelector('.popup');
     if (popupElement) {
@@ -205,94 +158,60 @@
       return;
     }
 
-    var adFormFields = document.querySelectorAll('.ad-form .ad-form__element');
-    for (var a = 0; a < adFormFields.length; a++) {
-      adFormFields[a].disabled = false;
-    }
-
-    var mapFiltersSelect = document.querySelectorAll('.map__filters .map__filter');
-    for (var b = 0; b < mapFiltersSelect.length; b++) {
-      mapFiltersSelect[b].disabled = false;
-    }
-
-    var mapFiltersFields = document.querySelectorAll('.map__filters .map__features');
-    for (var c = 0; c < mapFiltersFields.length; c++) {
-      mapFiltersFields[c].disabled = false;
-    }
-
-    window.getData(function (data) {
-      ads = data
+    window.apiUtil.getData(function (data) {
+      advertisements = data
         .filter(function (item) {
           return item.offer;
         });
 
       updatePins();
-    }, function () {
-      showErrorMessage();
-    });
+    }, showErrorMessage);
 
-    window.enableForm();
-    window.fillAddress();
-    window.changeMinValue();
-    window.disableFormCapacity();
-  };
-
-  // ДОБАВЛЯЕТ ПИНЫ ОБЪЯВЛЕНИЙ НА КАРТУ
-  window.addPinsToMap = function (adsList) {
-    map.classList.remove('map--faded');
-
-    var cardsFragment = document.createDocumentFragment();
-
-    for (var h = 0; h < adsList.length; h++) {
-      var ad = adsList[h];
-      var card = window.createPinElement(ad);
-      cardsFragment.appendChild(card);
-    }
-
-    var mapPins = document.querySelector('.map__pins');
-    mapPins.appendChild(cardsFragment);
+    window.formUtil.enableForm();
+    window.formUtil.changeMinValue();
+    window.formUtil.fillAddress();
+    window.formUtil.disableFormCapacity();
   };
 
   document.addEventListener('keydown', function (evt) {
-    if (evt.keyCode === 27) {
+    if (evt.keyCode === ESCAPE) {
       onPopupClose();
     }
   });
 
-  mainPin.addEventListener('click', enableMap);
+  mainPin.addEventListener('keydown', enableMap);
 
   mainPin.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
 
-    var startCoordX = evt.clientX;
-    var startCoordY = evt.clientY;
+    enableMap();
+
+    var lastPositionX = event.clientX;
+    var lastPositionY = event.pageY;
 
     var onMouseMove = function (moveEvt) {
       moveEvt.preventDefault();
 
-      var shiftX = startCoordX - moveEvt.clientX;
-      var shiftY = startCoordY - moveEvt.clientY;
+      var pinLeft = mainPin.offsetLeft;
+      var pinTop = mainPin.offsetTop;
 
-      var mainPinLeft = (mainPin.offsetLeft - shiftX);
-      var mainPinTop = (mainPin.offsetTop - shiftY);
+      var positionX = event.clientX;
+      var positionY = event.pageY;
 
-      if (mainPinTop >= MIN_MAP_HEIGHT && mainPinTop <= (MAX_MAP_HEIGHT)) {
-        mainPin.style.top = mainPinTop + 'px';
-      } else if (mainPinTop < MIN_MAP_HEIGHT) {
-        mainPin.style.top = MIN_MAP_HEIGHT + 'px';
-      } else if (mainPinTop > (MAX_MAP_HEIGHT)) {
-        mainPin.style.top = (MAX_MAP_HEIGHT) + 'px';
+      var deltaX = lastPositionX - positionX;
+      var deltaY = lastPositionY - positionY;
+
+      if (pinLeft - deltaX >= MIN_MAP_WIDTH && pinLeft + MAIN_PIN_SIZE - deltaX <= MAX_MAP_WIDTH) {
+        mainPin.style.left = pinLeft - deltaX + 'px';
+        lastPositionX = positionX;
       }
 
-      if (mainPinLeft >= MIN_MAP_WIDTH && mainPinLeft <= MAX_MAP_WIDTH) {
-        mainPin.style.left = mainPinLeft + 'px';
-      } else if (mainPinLeft < MIN_MAP_WIDTH) {
-        mainPin.style.left = MIN_MAP_WIDTH + 'px';
-      } else if (mainPinLeft > MAX_MAP_WIDTH) {
-        mainPin.style.left = MAX_MAP_WIDTH + 'px';
+      if (pinTop - deltaY > MIN_MAP_HEIGHT && pinTop + MAIN_PIN_SIZE + PIN_POINTER_HEIGHT - deltaY < MAX_MAP_HEIGHT) {
+        mainPin.style.top = pinTop - deltaY + 'px';
+        lastPositionY = positionY;
       }
 
-      window.fillAddress();
+      window.formUtil.fillAddress();
     };
 
     var onMouseUp = function (upEvt) {
@@ -301,7 +220,7 @@
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
 
-      window.fillAddress();
+      window.formUtil.fillAddress();
     };
 
     document.addEventListener('mousemove', onMouseMove);
