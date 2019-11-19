@@ -22,13 +22,13 @@
   var disableForm = function () {
     form.classList.add('ad-form--disabled');
 
-    for (var i = 0; i < adFormFields.length; i++) {
-      adFormFields[i].disabled = true;
-    }
+    Array.from(adFormFields).forEach(function (item) {
+      item.disabled = true;
+    });
 
-    for (var j = 0; j < mapFilters.length; j++) {
-      mapFilters[j].disabled = true;
-    }
+    Array.from(mapFilters).forEach(function (item) {
+      item.disabled = true;
+    });
   };
 
   var setDefaultValue = function () {
@@ -41,15 +41,15 @@
     formTimein.value = '12:00';
     formTimeout.value = '12:00';
 
-    for (var d = 0; d < mapFiltersInputs.length; d++) {
-      mapFiltersInputs[d].value = 'any';
-    }
+    Array.from(mapFiltersInputs).forEach(function (item) {
+      item.value = 'any';
+    });
   };
 
   var removeChecked = function () {
-    for (var a = 0; a < checkboxes.length; a++) {
-      checkboxes[a].checked = false;
-    }
+    Array.from(checkboxes).forEach(function (item) {
+      item.checked = false;
+    });
   };
 
   var deletePreviews = function () {
@@ -59,9 +59,9 @@
     var accPreviewContainer = document.querySelector('.ad-form__photo-container');
     var accPreviewImages = accPreviewContainer.querySelectorAll('.ad-form__photo');
 
-    for (var b = 0; b < accPreviewImages.length; b++) {
-      accPreviewContainer.removeChild(accPreviewImages[b]);
-    }
+    Array.from(accPreviewImages).forEach(function (item) {
+      accPreviewContainer.removeChild(item);
+    });
 
     var adFormPhoto = document.createElement('div');
     adFormPhoto.setAttribute('class', 'ad-form__photo');
@@ -86,7 +86,7 @@
   };
 
   formRoom.addEventListener('change', onGuestsSelectClick);
-  formType.addEventListener('change', window.changeMinValue);
+  formType.addEventListener('change', window.formUtil.changeMinValue);
 
 
   var delSuccessMessage = function () {
@@ -94,6 +94,7 @@
 
     if (successSubmit) {
       main.removeChild(successSubmit);
+      successSubmit.removeEventListener('click', delSuccessMessage);
     }
   };
 
@@ -114,33 +115,6 @@
     successSubmit.addEventListener('click', delSuccessMessage);
   };
 
-  var delErrorMessage = function () {
-    var error = document.querySelector('.error');
-
-    if (error) {
-      main.removeChild(error);
-    }
-  };
-
-  var showErrorMessage = function () {
-    var errorMessageTemplate = document.querySelector('#error').content;
-    var errorMessage = errorMessageTemplate.cloneNode(true);
-    var error = errorMessage.querySelector('.error');
-    var errorButton = errorMessage.querySelector('.error__button');
-
-    main.appendChild(errorMessage);
-
-    document.addEventListener('keydown', function (event) {
-      if (event.keyCode === ESCAPE) {
-        delErrorMessage();
-      }
-    });
-
-    error.addEventListener('click', delErrorMessage);
-
-    errorButton.addEventListener('click', delErrorMessage);
-  };
-
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
     var formData = new FormData(form);
@@ -151,7 +125,7 @@
       disableForm();
       showSuccessMessage();
     },
-    showErrorMessage);
+    window.errorUtil.showErrorMessage);
   });
 
   resetButton.addEventListener('click', function (evt) {

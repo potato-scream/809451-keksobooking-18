@@ -36,21 +36,21 @@
       var formCapacity = form.querySelector('#capacity');
 
       if (+formRoom.value === HUNDRED_ROOMS) {
-        for (var i = 0; i < formCapacity.options.length; i++) {
-          if (formCapacity.options[i].value === '0') {
-            formCapacity.options[i].removeAttribute('disabled');
+        Array.from(formCapacity.options).forEach(function (item) {
+          if (item.value === '0') {
+            item.removeAttribute('disabled');
           } else {
-            formCapacity.options[i].setAttribute('disabled', true);
+            item.setAttribute('disabled', true);
           }
-        }
+        });
       } else {
-        for (var j = 0; j < formCapacity.options.length; j++) {
-          if (+formCapacity.options[j].value <= formRoom.value && +formCapacity.options[j].value > 0) {
-            formCapacity.options[j].removeAttribute('disabled');
+        Array.from(formCapacity.options).forEach(function (item) {
+          if (+item.value <= formRoom.value && +item.value > 0) {
+            item.removeAttribute('disabled');
           } else {
-            formCapacity.options[j].setAttribute('disabled', true);
+            item.setAttribute('disabled', true);
           }
-        }
+        });
       }
     },
 
@@ -60,13 +60,13 @@
 
       form.classList.remove('ad-form--disabled');
 
-      for (var i = 0; i < adFormFields.length; i++) {
-        adFormFields[i].disabled = false;
-      }
+      Array.from(adFormFields).forEach(function (item) {
+        item.disabled = false;
+      });
 
-      for (var j = 0; j < mapFilters.length; j++) {
-        mapFilters[j].disabled = false;
-      }
+      Array.from(mapFilters).forEach(function (item) {
+        item.disabled = false;
+      });
     },
 
     changeMinValue: function () {

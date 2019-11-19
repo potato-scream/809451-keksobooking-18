@@ -1,5 +1,15 @@
 'use strict';
 (function () {
+  var BUNGALO = 'bungalo';
+  var FLAT = 'flat';
+  var HOUSE = 'house';
+  var PALACE = 'palace';
+
+  var FLAT_RU = 'Квартира';
+  var BUNGALO_RU = 'Бунгало';
+  var HOUSE_RU = 'Дом';
+  var PALACE_RU = 'Дворец';
+
   window.cardUtil = {
     createPopupElement: function (advertisement) {
       var popupTemplate = document.querySelector('#card').content;
@@ -21,14 +31,14 @@
       popupAddress.innerText = advertisement.offer.address;
       popupPrice.innerText = advertisement.offer.price + '₽/ночь';
 
-      if (advertisement.offer.type === 'flat') {
-        popupType.innerText = 'Квартира';
-      } else if (advertisement.offer.type === 'bungalo') {
-        popupType.innerText = 'Бунгало';
-      } else if (advertisement.offer.type === 'house') {
-        popupType.innerText = 'Дом';
-      } else if (advertisement.offer.type === 'palace') {
-        popupType.innerText = 'Дворец';
+      if (advertisement.offer.type === FLAT) {
+        popupType.innerText = FLAT_RU;
+      } else if (advertisement.offer.type === BUNGALO) {
+        popupType.innerText = BUNGALO_RU;
+      } else if (advertisement.offer.type === HOUSE) {
+        popupType.innerText = HOUSE_RU;
+      } else if (advertisement.offer.type === PALACE) {
+        popupType.innerText = PALACE_RU;
       }
 
       popupTextCapacity.innerText = advertisement.offer.rooms + ' комнаты для ' + advertisement.offer.guests + ' гостей';
@@ -38,23 +48,23 @@
       popupFeatures.innerHTML = '';
 
       var featuresFragment = document.createDocumentFragment();
-      for (var y = 0; y < advertisement.offer.features.length; y++) {
+      advertisement.offer.features.forEach(function (feature) {
         var li = document.createElement('li');
         li.classList.add('popup__feature');
-        li.classList.add('popup__feature--' + advertisement.offer.features[y]);
+        li.classList.add('popup__feature--' + feature);
         featuresFragment.appendChild(li);
-      }
+      });
 
       popupFeatures.appendChild(featuresFragment);
 
       popupDescription.innerText = advertisement.offer.description;
 
       var photosFragment = document.createDocumentFragment();
-      for (var u = 0; u < advertisement.offer.photos.length; u++) {
+      advertisement.offer.photos.forEach(function (item) {
         var photo = popupPhoto.cloneNode();
-        photo.setAttribute('src', advertisement.offer.photos[u]);
+        photo.setAttribute('src', item);
         photosFragment.appendChild(photo);
-      }
+      });
       popupPhotos.innerHTML = '';
       popupPhotos.appendChild(photosFragment);
 

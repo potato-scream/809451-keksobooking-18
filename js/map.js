@@ -53,14 +53,14 @@
     updatePins();
   });
 
-  for (var i = 0; i < featuresCheckboxes.length; i++) {
-    featuresCheckboxes[i].addEventListener('change', updatePins);
-  }
+  Array.from(featuresCheckboxes).forEach(function (item) {
+    item.addEventListener('change', updatePins);
+  });
 
   var wrapperClick = function (pin, advertisement) {
     pin.addEventListener('click', function () {
       if (document.querySelector('.popup')) {
-        onPopupClose();
+        window.mapUtil.onPopupClose();
       }
 
       var activePin = document.querySelector('.map__pin.map__pin--active');
@@ -75,7 +75,7 @@
       map.insertBefore(popup, mapFilters);
 
       var popupClose = document.querySelector('.popup__close');
-      popupClose.addEventListener('mousedown', onPopupClose);
+      popupClose.addEventListener('mousedown', window.mapUtil.onPopupClose);
     });
   };
 
@@ -134,38 +134,33 @@
 
     window.mapUtil.addPinsToMap(filteredAds);
     var pinList = document.querySelectorAll('.map__pin:not(.map__pin--main)');
-    for (var p = 0; p < pinList.length; p++) {
-      wrapperClick(pinList[p], filteredAds[p]);
-    }
+
+    Array.from(pinList).forEach(function (item, index) {
+      wrapperClick(item, filteredAds[index]);
+    });
   });
-
-  var onPopupClose = function () {
-    var popupElement = document.querySelector('.popup');
-    if (popupElement) {
-      popupElement.remove();
-    }
-  };
-
-  var showErrorMessage = function () {
-    var errorTemplate = document.querySelector('#error').content;
-    var errorMessage = errorTemplate.cloneNode(true);
-    var main = document.querySelector('main');
-    main.appendChild(errorMessage);
-  };
 
   var enableMap = function () {
     if (!map.classList.contains('map--faded')) {
       return;
     }
 
-    window.apiUtil.getData(function (data) {
-      advertisements = data
-        .filter(function (item) {
-          return item.offer;
-        });
-
+    if (advertisements.length) {
+      priceFilter = ANY;
+      roomsFilter = ANY;
+      guestsFilter = ANY;
+      accomodationTypeFilter = ANY;
       updatePins();
-    }, showErrorMessage);
+    } else {
+      window.apiUtil.getData(function (data) {
+        advertisements = data
+          .filter(function (item) {
+            return item.offer;
+          });
+
+        updatePins();
+      }, window.errorUtil.showErrorMessage);
+    }
 
     window.formUtil.enableForm();
     window.formUtil.changeMinValue();
@@ -175,7 +170,7 @@
 
   document.addEventListener('keydown', function (evt) {
     if (evt.keyCode === ESCAPE) {
-      onPopupClose();
+      window.mapUtil.onPopupClose();
     }
   });
 
@@ -201,12 +196,12 @@
       var deltaX = lastPositionX - positionX;
       var deltaY = lastPositionY - positionY;
 
-      if (pinLeft - deltaX >= MIN_MAP_WIDTH && pinLeft + MAIN_PIN_SIZE - deltaX <= MAX_MAP_WIDTH) {
+      if (pinLeft - deltaX + MAIN_PIN_SIZE / 2 >= MIN_MAP_WIDTH && pinLeft + MAIN_PIN_SIZE - Math.ceil(MAIN_PIN_SIZE / 2) - deltaX <= MAX_MAP_WIDTH) {
         mainPin.style.left = pinLeft - deltaX + 'px';
         lastPositionX = positionX;
       }
 
-      if (pinTop - deltaY > MIN_MAP_HEIGHT && pinTop + MAIN_PIN_SIZE + PIN_POINTER_HEIGHT - deltaY < MAX_MAP_HEIGHT) {
+      if (pinTop - deltaY + MAIN_PIN_SIZE + PIN_POINTER_HEIGHT >= MIN_MAP_HEIGHT && pinTop + MAIN_PIN_SIZE + PIN_POINTER_HEIGHT - deltaY <= MAX_MAP_HEIGHT) {
         mainPin.style.top = pinTop - deltaY + 'px';
         lastPositionY = positionY;
       }
